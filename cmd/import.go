@@ -24,7 +24,7 @@ var importCmd = &cobra.Command{
 			} else if len(args) > 2 {
 				fmt.Println("Too many arguments provided. Check memento import --help for more information.")
 			}
-		} else if !utils.IsType(args[0]) {
+		} else if ok, _ := utils.IsType(args[0]); !ok {
 			fmt.Printf("Uknown datatype: %s. Check memento types list for all types.", args[0])
 		} else if _, err := os.Stat(args[1]); os.IsNotExist(err) {
 			fmt.Printf("No such file or directory: %s", args[1])
@@ -32,10 +32,7 @@ var importCmd = &cobra.Command{
 			datatype := args[0]
 			path := args[1]
 
-			err := scripts.ImportDatapoints(datatype, path)
-			if err != nil {
-				fmt.Println(err)
-			}
+			scripts.ImportDatapoints(datatype, path)
 			return
 		}
 	},

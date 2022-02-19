@@ -11,14 +11,14 @@ import (
 )
 
 func Add() {
-	config := utils.LoadConfig()
+	config, err := utils.LoadConfig()
+	if utils.Handle(err) != nil { return }
 
 	var id string
 	var trueName string
 	var extentionsString string
 	var dated string
 	var determineTime string
-	var err error
 
 	fmt.Println("Check memento types add --help for further specification")
 
@@ -79,7 +79,8 @@ func Remove() {
 	var id string
 
 	input := bufio.NewReader(os.Stdin)
-	config := utils.LoadConfig()
+	config, err := utils.LoadConfig()
+	if utils.Handle(err) != nil { return }
 
 	fmt.Print("Enter the ID of the type you wish to delete: ")
 	id, _ = input.ReadString('\n')
@@ -101,7 +102,8 @@ func Remove() {
 }
 
 func List() {
-	config := utils.LoadConfig()
+	config, err := utils.LoadConfig()
+	if utils.Handle(err) != nil { return }
 
 	for key, value := range config {
 		fmt.Println(key, value.TrueName, value.Extensions, value.Dated, value.DetermineTime)

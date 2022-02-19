@@ -23,7 +23,8 @@ func ImportDatapoints(dataType string, inputPath string) {
 	}
 
 	// load the data type enums here
-	type_enums := utils.LoadConfig()
+	type_enums, err := utils.LoadConfig()
+	if utils.Handle(err) != nil { return }
 	data_points := make(map[string][]structs.DataPoint)
 
 	if _, err := os.Stat(inputPath); err == nil {
@@ -50,7 +51,8 @@ func ImportDatapoints(dataType string, inputPath string) {
 						}
 
 						defer io_reader.Close()
-						file_duration := utils.GetMP4Duration(io_reader)
+						file_duration, err := utils.GetMP4Duration(io_reader)
+						if err != nil { return err}
 
 						// calculate the start_time_parsed
 						start_time = info.ModTime().Add(time.Duration(-(int64(file_duration))) * time.Second)

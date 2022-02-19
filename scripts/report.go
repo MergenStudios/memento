@@ -14,7 +14,8 @@ func Reporter(startDate time.Time, fileName string, timezone *time.Location) {
 	endDate := startDate.AddDate(0, 0, 1)
 
 	// load the data type enums here
-	typeEnums := utils.LoadConfig()
+	typeEnums, err := utils.LoadConfig()
+	if utils.Handle(err) != nil { return }
 
 	// make the report file
 	if fileName == "" {
