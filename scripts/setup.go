@@ -14,25 +14,25 @@ func Setup() {
 	if utils.Handle(os.Mkdir("reports", os.ModePerm)) != nil { return }
 
 	typesEnum := map[string]structs.TypeEnum{
-		"RECORDINGS": structs.TypeEnum{
+		"RECORDINGS": {
 			TrueName:      "Recording",
 			Extensions:    []string{"mp4", "mov"},
 			Dated:         "range",
 			DetermineTime: "video",
 		},
-		"VIDEOS": structs.TypeEnum{
+		"VIDEOS": {
 			TrueName:      "Video",
 			Extensions:    []string{"mp4", "mov"},
 			Dated:         "range",
 			DetermineTime: "video",
 		},
-		"SCREENSHOTS": structs.TypeEnum{
+		"SCREENSHOTS": {
 			TrueName:      "Screenshot",
 			Extensions:    []string{"png", "jpg"},
 			Dated:         "point",
 			DetermineTime: "mtime",
 		},
-		"PHOTOS": structs.TypeEnum{
+		"PHOTOS": {
 			TrueName:      "Photo",
 			Extensions:    []string{"png", "jpg"},
 			Dated:         "point",
