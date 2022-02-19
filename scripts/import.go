@@ -1,14 +1,11 @@
 package scripts
 
 import (
-	"compress/gzip"
 	"fmt"
-	"io/ioutil"
 	"memento/structs"
 	"memento/utils"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -57,69 +54,8 @@ func ImportDatapoints(dataType string, inputPath string) {
 						// calculate the start_time_parsed
 						start_time = info.ModTime().Add(time.Duration(-(int64(file_duration))) * time.Second)
 						end_time = info.ModTime()
-					} else if type_enums[dataType].DetermineTime == "mc-log" {
-						// read the log file
-						file, err := os.Open(file_path)
-						if err != nil {
-							return err
-						}
-						defer file.Close()
-
-						gzip_file, err := gzip.NewReader(file)
-						if err != nil {
-							return err
-						}
-						defer gzip_file.Close()
-
-						byteValues, _ := ioutil.ReadAll(gzip_file)
-
-						// get the last timestamp from the log file
-						check := regexp.MustCompile("\\[[0-9]{2}:[0-9]{2}:[0-9]{2}\\]")
-						counter := len(byteValues) - 1
-						line := ""
-						for {
-							if counter == 0 {
-								line = string(byteValues)
-								break
-							}
-
-							da_char := string(byteValues[counter])
-							line = da_char + line
-
-							if string(byteValues[counter]) == "\n" {
-								if check.FindString(line) != "" {
-									break
-								}
-							}
-							counter--
-						}
-
-						// get the start time as a string from the beginning of the log file
-						start_time_string := string(byteValues[1:9])
-
-						// format the end time
-						var end_time_string string
-						if len(line) < 8 {
-							end_time_string = start_time_string
-						} else {
-							end_time_string = strings.Replace(line, "\n", "", -1)[1:9]
-						}
-						// fmt.Println(info.Name(), end_time_string)
-
-						// extract the start date from the title of the log file
-						extract_check := regexp.MustCompile("([0-9]{4}-[0-9]{2}-[0-9]{2})-[0-9].*")
-						check_result := extract_check.FindAllStringSubmatch(info.Name(), -1)
-
-						if len(check_result) == 0 {
-							// continue if no date is found in the title of the log file
-							continue
-						} else {
-							// parse the start time from the above parsed strings
-							start_time, _ = time.Parse("2006-01-02|15:04:05", check_result[0][1]+"|"+start_time_string)
-							end_time, _ = time.Parse("2006-01-02|15:04:05", check_result[0][1]+"|"+end_time_string)
-
-						}
 					}
+
 
 					// creat the datapoint
 					var data_point structs.DataPoint
