@@ -53,7 +53,7 @@ func Add() {
 		dated, _ = input.ReadString('\n')
 	}
 
-	fmt.Print("Enter how the time should be determined (mtime|video|mc-log): ")
+	fmt.Print("Enter how the time should be determined (mtime|video): ")
 	determineTime, err = input.ReadString('\n')
 	if utils.Handle(err) != nil { return }
 	determineTime = utils.CleanString(determineTime)
