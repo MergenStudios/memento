@@ -8,19 +8,14 @@ import (
 	"os"
 )
 
-func LoadConfig() map[string]structs.TypeEnum {
+func LoadConfig() (map[string]structs.TypeEnum, error) {
 	// load the data type enums here
 	jsonFile, err := os.Open("./config/typesEnum.json")
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
-	defer func(jsonFile *os.File) {
-		err := jsonFile.Close()
-		if err != nil {
-			log.Println(err)
-		}
-	}(jsonFile)
+	defer jsonFile.Close()
 	var typeEnums map[string]structs.TypeEnum
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
@@ -29,13 +24,14 @@ func LoadConfig() map[string]structs.TypeEnum {
 		log.Println(err)
 	}
 
-	return typeEnums
+	return typeEnums, nil
 }
 
-func IsType(name string) bool {
-	config := LoadConfig()
+func IsType(name string) (bool, error) {
+	config, err := LoadConfig()
+	if Handle(err) != nil {return false, err}
 	if _, ok := config[name]; ok {
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 }

@@ -18,27 +18,34 @@ func Add() {
 	var extentionsString string
 	var dated string
 	var determineTime string
+	var err error
 
 	fmt.Println("Check memento types add --help for further specification")
 
 	input := bufio.NewReader(os.Stdin)
 
 	fmt.Print("Enter ID (SCREENSHOT): ")
-	id, _ = input.ReadString('\n')
+	id, err = input.ReadString('\n')
+	if utils.Handle(err) != nil {
+		return
+	}
 	id = utils.CleanString(id)
 
 	fmt.Print("Enter display name (Screenshot): ")
-	trueName, _ = input.ReadString('\n')
+	trueName, err = input.ReadString('\n')
+	if utils.Handle(err) != nil { return }
 	trueName = utils.CleanString(trueName)
 
 	fmt.Print("Enter allowed extentions seperated by commas: ")
-	extentionsString, _ = input.ReadString('\n')
+	extentionsString, err = input.ReadString('\n')
+	if utils.Handle(err) != nil { return }
 	extentionsString = utils.CleanString(extentionsString)
 
 	extentions := strings.Split(extentionsString, ",")
 
 	fmt.Print("Enter the type of time data represented by the type (point|range): ")
-	dated, _ = input.ReadString('\n')
+	dated, err = input.ReadString('\n')
+	if utils.Handle(err) != nil { return }
 	dated = utils.CleanString(dated)
 
 	for !utils.InList(dated, []string{"point", "range"}) {
@@ -47,7 +54,8 @@ func Add() {
 	}
 
 	fmt.Print("Enter how the time should be determined (mtime|video|mc-log): ")
-	determineTime, _ = input.ReadString('\n')
+	determineTime, err = input.ReadString('\n')
+	if utils.Handle(err) != nil { return }
 	determineTime = utils.CleanString(determineTime)
 
 	for !utils.InList(determineTime, []string{"mtime", "video", "mc-logs"}) {
@@ -62,7 +70,8 @@ func Add() {
 		DetermineTime: determineTime,
 	}
 
-	jsonString, _ := json.Marshal(config)
+	jsonString, err := json.Marshal(config)
+	if utils.Handle(err) != nil { return }
 	os.WriteFile("./config/typesEnum.json", jsonString, os.ModePerm)
 }
 

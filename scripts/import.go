@@ -4,7 +4,6 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"memento/structs"
 	"memento/utils"
 	"os"
@@ -16,11 +15,11 @@ import (
 	"time"
 )
 
-func ImportDatapoints(dataType string, inputPath string) error {
+func ImportDatapoints(dataType string, inputPath string) {
 	// set the timezone
 	timezone, err := time.LoadLocation("UTC")
-	if err != nil {
-		fmt.Println(err)
+	if utils.Handle(err) != nil {
+		return
 	}
 
 	// load the data type enums here
@@ -29,7 +28,7 @@ func ImportDatapoints(dataType string, inputPath string) error {
 
 	if _, err := os.Stat(inputPath); err == nil {
 		// walk through every file in the path
-		_ = filepath.Walk(inputPath, func(file_path string, info os.FileInfo, err error) error {
+		err = filepath.Walk(inputPath, func(file_path string, info os.FileInfo, err error) error {
 			fmt.Println(info.Name())
 
 			// for every file extensions the give format can possibly have
@@ -45,7 +44,11 @@ func ImportDatapoints(dataType string, inputPath string) error {
 						start_time = info.ModTime().In(timezone)
 					} else if type_enums[dataType].DetermineTime == "video" {
 
-						io_reader, _ := os.Open(file_path)
+						io_reader, err := os.Open(file_path)
+						if err != nil {
+							return err
+						}
+
 						defer io_reader.Close()
 						file_duration := utils.GetMP4Duration(io_reader)
 
@@ -54,10 +57,16 @@ func ImportDatapoints(dataType string, inputPath string) error {
 						end_time = info.ModTime()
 					} else if type_enums[dataType].DetermineTime == "mc-log" {
 						// read the log file
-						file, _ := os.Open(file_path)
+						file, err := os.Open(file_path)
+						if err != nil {
+							return err
+						}
 						defer file.Close()
 
-						gzip_file, _ := gzip.NewReader(file)
+						gzip_file, err := gzip.NewReader(file)
+						if err != nil {
+							return err
+						}
 						defer gzip_file.Close()
 
 						byteValues, _ := ioutil.ReadAll(gzip_file)
@@ -139,9 +148,8 @@ func ImportDatapoints(dataType string, inputPath string) error {
 			}
 			return err
 		})
-		if err != nil {
-			log.Println(err)
-			return err
+		if utils.Handle(err) != nil {
+			return
 		}
 	}
 
@@ -153,25 +161,17 @@ func ImportDatapoints(dataType string, inputPath string) error {
 		// if the gob file exists
 		if _, err := os.Stat(gob_path); err == nil {
 			err = utils.ReadGob(gob_path, &month_data)
-			if err != nil {
-				log.Println(err)
-				return err
-			}
+			if utils.Handle(err) != nil { return }
+
 			month_data.Data = append(month_data.Data, da_data_points...)
 		} else {
 			split_string := strings.Split(key, "-")
 
 			year, err := strconv.ParseInt(split_string[0], 10, 64)
-			if err != nil {
-				log.Println(err)
-				return err
-			}
+			if utils.Handle(err) != nil { return }
 
 			month, err := strconv.ParseInt(split_string[1], 10, 64)
-			if err != nil {
-				log.Println(err)
-				return err
-			}
+			if utils.Handle(err) != nil { return }
 
 			month_data.StartTime = time.Date(
 				int(year),
@@ -196,13 +196,10 @@ func ImportDatapoints(dataType string, inputPath string) error {
 
 		// serialize the now sorted month data
 		err := utils.WriteGob(gob_path, month_data)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-	}
+		if utils.Handle(err) != nil { return }
 
-	return nil
+	}
+	return
 
 	// TODO: add redundancy
 	// TODO: solve issue when adding the same set of datapoints more than one time

@@ -3,14 +3,15 @@ package scripts
 import (
 	"encoding/json"
 	"memento/structs"
+	"memento/utils"
 	"os"
 )
 
 func Setup() {
 	// create the directory structure needed for a memento collection
-	os.Mkdir("config", os.ModePerm)
-	os.Mkdir("data", os.ModePerm)
-	os.Mkdir("reports", os.ModePerm)
+	if utils.Handle(os.Mkdir("config", os.ModePerm)) != nil { return }
+	if utils.Handle(os.Mkdir("data", os.ModePerm)) != nil { return }
+	if utils.Handle(os.Mkdir("reports", os.ModePerm)) != nil { return }
 
 	typesEnum := map[string]structs.TypeEnum{
 		"RECORDINGS": structs.TypeEnum{
@@ -40,5 +41,5 @@ func Setup() {
 	}
 
 	jsonString, _ := json.Marshal(typesEnum)
-	os.WriteFile("./config/typesEnum.json", jsonString, os.ModePerm)
+	if utils.Handle(os.WriteFile("./config/typesEnum.json", jsonString, os.ModePerm)) != nil { return }
 }
