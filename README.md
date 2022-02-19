@@ -36,6 +36,4 @@ Report 28-05-2018
 
 For the full documentation you can always use `memento [command] --help`
 
-
-
 **Contributions are welcome, feel free to make a pull request or open an issue!**
