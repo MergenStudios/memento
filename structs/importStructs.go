@@ -12,6 +12,7 @@ type TypeEnum struct {
 }
 
 type MonthData struct {
+	Hashes    []string
 	StartTime time.Time
 	EndTime   time.Time
 	Data      []DataPoint
@@ -22,5 +23,5 @@ type DataPoint struct {
 	Start time.Time
 	End   time.Time
 	Type  string
-	Path  string
+	Path  string 	`hash:"-"`
 }

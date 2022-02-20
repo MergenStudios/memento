@@ -2,6 +2,7 @@ package scripts
 
 import (
 	"fmt"
+	"github.com/cnf/structhash"
 	"memento/structs"
 	"memento/utils"
 	"os"
@@ -21,9 +22,12 @@ func ImportDatapoints(dataType string, inputPath string) {
 
 	// load the data type enums here
 	typeEnums, err := utils.LoadConfig()
-	if utils.Handle(err) != nil { return }
+	if utils.Handle(err) != nil {
+		return
+	}
 	dataPoints := make(map[string][]structs.DataPoint)
 
+	// make a list of all datapoints
 	if _, err := os.Stat(inputPath); err == nil {
 		// walk through every file in the path
 		err = filepath.Walk(inputPath, func(filePath string, info os.FileInfo, err error) error {
@@ -49,13 +53,14 @@ func ImportDatapoints(dataType string, inputPath string) {
 
 						defer ioReader.Close()
 						fileDuration, err := utils.GetMP4Duration(ioReader)
-						if err != nil { return err}
+						if err != nil {
+							return err
+						}
 
 						// calculate the start_time_parsed
 						startTime = info.ModTime().Add(time.Duration(-(int64(fileDuration))) * time.Second)
 						endTime = info.ModTime()
 					}
-
 
 					// creat the datapoint
 					var dataPoint structs.DataPoint
@@ -91,6 +96,7 @@ func ImportDatapoints(dataType string, inputPath string) {
 		}
 	}
 
+	// write all the datapoints to the gob files
 	for key, daDataPoints := range dataPoints {
 
 		var monthData structs.MonthData
@@ -99,18 +105,36 @@ func ImportDatapoints(dataType string, inputPath string) {
 		// if the gob file exists
 		if _, err := os.Stat(gobPath); err == nil {
 			err = utils.ReadGob(gobPath, &monthData)
-			if utils.Handle(err) != nil { return }
+			if utils.Handle(err) != nil {
+				return
+			}
+			for _, datapoint := range daDataPoints {
+				datapointHash, err := structhash.Hash(datapoint, 1)
+				if utils.Handle(err) != nil { return }
 
-			monthData.Data = append(monthData.Data, daDataPoints...)
+				if !utils.InList(datapointHash, monthData.Hashes) {
+					fmt.Println("its a new one", datapointHash, monthData.Hashes)
+					monthData.Hashes = append(monthData.Hashes, datapointHash)
+					monthData.Data = append(monthData.Data, daDataPoints...)
+				} else {
+					fmt.Println("Duplicate found: " + datapoint.Path)
+				}
+			}
+
 		} else {
 			splitString := strings.Split(key, "-")
 
 			year, err := strconv.ParseInt(splitString[0], 10, 64)
-			if utils.Handle(err) != nil { return }
+			if utils.Handle(err) != nil {
+				return
+			}
 
 			month, err := strconv.ParseInt(splitString[1], 10, 64)
-			if utils.Handle(err) != nil { return }
+			if utils.Handle(err) != nil {
+				return
+			}
 
+			// TODO: this can be improved
 			monthData.StartTime = time.Date(
 				int(year),
 				time.Month(month),
@@ -123,8 +147,13 @@ func ImportDatapoints(dataType string, inputPath string) {
 			)
 
 			monthData.EndTime = monthData.StartTime.AddDate(0, 1, 0)
-
 			monthData.Data = daDataPoints
+
+			for _, datapoint := range daDataPoints {
+				datapointHash, err := structhash.Hash(datapoint, 1)
+				if utils.Handle(err) != nil { return }
+				monthData.Hashes = append(monthData.Hashes, datapointHash)
+			}
 		}
 
 		// sort the array of unsorted data points
@@ -134,7 +163,9 @@ func ImportDatapoints(dataType string, inputPath string) {
 
 		// serialize the now sorted month data
 		err := utils.WriteGob(gobPath, monthData)
-		if utils.Handle(err) != nil { return }
+		if utils.Handle(err) != nil {
+			return
+		}
 
 	}
 	return
