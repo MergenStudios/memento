@@ -31,10 +31,11 @@ Be sure to use YYYY-MM-DD for the date and Area/Location according to the IANA t
 			fmt.Println("Couldn't pares timezone - be sure to use Area/Location according to the IANA timezone database")
 		} else {
 			fileName, _ := cmd.Flags().GetString("file-name")
-			day, _ := time.Parse("2006-01-02", args[0])
-			timezone, _ := time.LoadLocation(args[1])
 
-			scripts.Reporter(day, fileName, timezone)
+			timezone, _ := time.LoadLocation(args[1])
+			utcDay, _ := time.Parse("2006-01-02 ", args[0])
+
+			scripts.Reporter(utcDay, fileName, timezone)
 		}
 	},
 }
