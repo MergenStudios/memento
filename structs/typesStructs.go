@@ -1,9 +1,9 @@
 package structs
 
 type TypeLengths struct {
-	Id            int
-	TrueName      int
-	Extensions    int
-	Dated         int
-	DetermineTime int
+	Id            string
+	TrueName      string
+	Extensions    []string
+	Dated         string
+	DetermineTime string
 }

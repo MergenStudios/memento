@@ -1,14 +1,14 @@
 package scripts
 
 import (
-	"fmt"
 	"memento/structs"
 	"memento/utils"
 	"os"
+	"strconv"
 	"time"
 )
 
-func Reporter(startDate time.Time, fileName string, timezone *time.Location) {
+func Reporter(startDate time.Time, fileName string, timezone *time.Location, stats bool) {
 	convertedDay := startDate.In(timezone)
 	name, _ := convertedDay.Zone()
 
@@ -30,11 +30,11 @@ func Reporter(startDate time.Time, fileName string, timezone *time.Location) {
 		return
 	}
 
+	var reportLines []string
+
 	// write the header of the report
-	_, err = file.WriteString("Report " + startDate.Format("2006-01-02") + "\n")
-	if utils.Handle(err) != nil {
-		return
-	}
+	headerLine := "Report " + startDate.Format("2006-01-02") + "\n"
+	var bodyLines []string
 
 	// read the required gob file
 	var monthData structs.MonthData
@@ -43,30 +43,70 @@ func Reporter(startDate time.Time, fileName string, timezone *time.Location) {
 		return
 	}
 
-	fmt.Println(startDate, endDate)
-	// loop over the gob file and write to the report on every match
+	var fileCount int64
+	fileTypesCount := make(map[string]int64)
 	for _, value := range monthData.Data {
 		valueStart := value.Start.In(timezone)
 		valueEnd := value.Start.In(timezone)
 
 		// if the value is inside the desired timespan
 		if valueStart.After(startDate) && valueStart.Before(endDate) {
-			fileStat, _ := os.Stat(value.Path)
-			modTime := fileStat.ModTime()
-
-			fmt.Println(valueStart, modTime)
-
 			if value.Dated == "point" {
-				_, err := file.WriteString("\n" + valueStart.Format("15:04:05") + "            | " + typeEnums[value.Type].TrueName + "\t" + value.Path)
-				if utils.Handle(err) != nil {
-					return
+				bodyLines = append(bodyLines, valueStart.Format("15:04:05")+"            | "+typeEnums[value.Type].TrueName+"\t"+value.Path)
+
+				fileCount++
+				if _, ok := fileTypesCount[value.Type]; ok {
+					fileTypesCount[value.Type]++
+				} else {
+					fileTypesCount[value.Type] = 1
 				}
 			} else if value.Dated == "range" {
-				_, err := file.WriteString("\n" + valueStart.Format("15:04:05") + " - " + valueEnd.Format("15:04:05") + " | " + typeEnums[value.Type].TrueName + "\t\t" + value.Path)
-				if utils.Handle(err) != nil {
-					return
+				bodyLines = append(bodyLines,
+					valueStart.Format("15:04:05")+
+						" - "+
+						valueEnd.Format("15:04:05")+
+						" | "+
+						typeEnums[value.Type].TrueName+
+						"\t\t"+
+						value.Path)
+
+				fileCount++
+				if _, ok := fileTypesCount[value.Type]; ok {
+					fileTypesCount[value.Type]++
+				} else {
+					fileTypesCount[value.Type] = 1
 				}
 			}
+		}
+	}
+
+	var statsLine string
+	statsLine += strconv.FormatInt(fileCount, 10) + " files" + "\t"
+	for key, val := range fileTypesCount {
+		if len(fileTypesCount) == 1 {
+			statsLine +=
+				strconv.FormatInt(val, 10) +
+					" x " +
+					typeEnums[key].TrueName
+		} else {
+			statsLine +=
+				strconv.FormatInt(val, 10) +
+					" x " +
+					typeEnums[key].TrueName +
+					" ⁞ "
+		}
+	}
+	statsLine += "\n"
+
+	// write the file
+	reportLines = append(reportLines, headerLine)
+	reportLines = append(reportLines, statsLine)
+	reportLines = append(reportLines, bodyLines...)
+
+	for _, line := range reportLines {
+		_, err := file.WriteString(line + "\n")
+		if utils.Handle(err) != nil {
+			return
 		}
 	}
 }

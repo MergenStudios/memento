@@ -30,12 +30,13 @@ Be sure to use YYYY-MM-DD for the date and Area/Location according to the IANA t
 		} else if _, ok := time.LoadLocation(args[1]); ok != nil {
 			fmt.Println("Couldn't pares timezone - be sure to use Area/Location according to the IANA timezone database")
 		} else {
-			fileName, _ := cmd.Flags().GetString("file-name")
+			fileName, _ := cmd.Flags().GetString("output")
+			stats, _ := cmd.Flags().GetBool("stats")
 
 			timezone, _ := time.LoadLocation(args[1])
 			utcDay, _ := time.Parse("2006-01-02 ", args[0])
 
-			scripts.Reporter(utcDay, fileName, timezone)
+			scripts.Reporter(utcDay, fileName, timezone, stats)
 		}
 	},
 }
@@ -43,5 +44,6 @@ Be sure to use YYYY-MM-DD for the date and Area/Location according to the IANA t
 func init() {
 	RootCmd.AddCommand(reportCmd)
 
-	reportCmd.Flags().String("file-name", "", "The filename of the report")
+	reportCmd.Flags().String("output", "", "The filename of the report")
+	reportCmd.Flags().Bool("stats", true, "Add general stats about the day to your report")
 }
