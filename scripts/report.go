@@ -100,7 +100,9 @@ func Reporter(startDate time.Time, fileName string, timezone *time.Location, sta
 
 	// write the file
 	reportLines = append(reportLines, headerLine)
-	reportLines = append(reportLines, statsLine)
+	if stats {
+		reportLines = append(reportLines, statsLine)
+	}
 	reportLines = append(reportLines, bodyLines...)
 
 	for _, line := range reportLines {

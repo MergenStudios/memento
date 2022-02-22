@@ -45,5 +45,5 @@ func init() {
 	RootCmd.AddCommand(reportCmd)
 
 	reportCmd.Flags().String("output", "", "The filename of the report")
-	reportCmd.Flags().Bool("stats", true, "Add general stats about the day to your report")
+	reportCmd.Flags().Bool("stats", false, "Add general stats about the day to your report")
 }
