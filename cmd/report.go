@@ -25,10 +25,10 @@ Be sure to use YYYY-MM-DD for the date and Area/Location according to the IANA t
 			}
 			return
 		} else if _, ok := time.Parse("2006-01-02", args[0]); ok != nil {
-			fmt.Println("Couldn't parse date - be sure to follow the format YYYY-MM-DD")
+			fmt.Println("Couldn't parse date - be sure to use the format YYYY-MM-DD")
 			return
 		} else if _, ok := time.LoadLocation(args[1]); ok != nil {
-			fmt.Println("Couldn't pares timezone - be sure to use Area/Location according to the IANA timezone database")
+			fmt.Println("Couldn't pares timezone - be sure to use Area/Location according to the IANA timezone database (https://www.iana.org/time-zones)")
 		} else {
 			fileName, _ := cmd.Flags().GetString("output")
 			stats, _ := cmd.Flags().GetBool("stats")

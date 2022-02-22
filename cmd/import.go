@@ -10,19 +10,22 @@ import (
 
 var importCmd = &cobra.Command{
 	Use:   "import [flags] [TYPE] [PATH]",
-	Short: "Import a single or multiple datapoints to your project.",
+	Short: "Import datapoints to your memento project",
+	Long:  `This command is used to import datapoints into your project. It takes in a type and a path as arguments.
+You can manipulate the types in your memento project with the types command, 
+check memento types --help for more information.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// check if the args are valid
 		if len(args) != 2 {
 			if len(args) == 0 {
-				fmt.Println("No arguments provided. Check memento import --help for more information.")
+				fmt.Println("No arguments provided. Check memento import --help for more information")
 				return
 			} else if len(args) == 2 {
-				fmt.Println("Not enough arguments provided. Check memento import --help for more information.")
+				fmt.Println("Not enough arguments provided. Check memento import --help for more information")
 				return
 			} else if len(args) > 2 {
-				fmt.Println("Too many arguments provided. Check memento import --help for more information.")
+				fmt.Println("Too many arguments provided. Check memento import --help for more information")
 			}
 		} else if ok, _ := utils.IsType(args[0]); !ok {
 			fmt.Printf("Uknown datatype: %s. Check memento types list for all types.", args[0])

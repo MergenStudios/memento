@@ -5,6 +5,7 @@ import (
 	"memento/utils"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -22,17 +23,20 @@ func Reporter(startDate time.Time, fileName string, timezone *time.Location, sta
 	}
 
 	// make the report file
+	var file *os.File
 	if fileName == "" {
-		fileName = startDate.Format("Report-2006-01-02")
+		fileName = "./reports/" + startDate.Format("Report-2006-01-02") + ".txt"
+	} else if !strings.HasSuffix(fileName, ".txt") {
+		fileName += ".txt"
 	}
-	file, err := os.Create("./reports/" + fileName + ".txt")
+	file, err = os.Create(fileName)
 	if utils.Handle(err) != nil {
 		return
 	}
 
 	var reportLines []string
 
-	// write the header of the report
+	// create the header of the report
 	headerLine := "Report " + startDate.Format("2006-01-02") + "\n"
 	var bodyLines []string
 
