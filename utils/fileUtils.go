@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"io"
 )
 
@@ -43,7 +44,11 @@ func GetMP4Duration(reader io.ReaderAt) (lengthOfTime uint32, err error) {
 
 	moovStartBytes := make([]byte, 0x100)
 	_, err = reader.ReadAt(moovStartBytes, offset)
-	if Handle(err) != nil { return 0, err}
+	if errors.Is(err, io.EOF) {
+		return 0, nil
+	} else if Handle(err) != nil {
+		return 0, err
+	}
 
 
 	timeScaleOffset := 0x1C

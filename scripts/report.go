@@ -84,6 +84,10 @@ func Reporter(startDate time.Time, fileName string, timezone *time.Location, sta
 		}
 	}
 
+	if fileCount == 0 {
+		file.WriteString("No Files found for " + startDate.Format("2006-01-02"))
+	}
+
 	var statsLine string
 	statsLine += strconv.FormatInt(fileCount, 10) + " files" + "\t"
 	for key, val := range fileTypesCount {

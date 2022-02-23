@@ -58,6 +58,10 @@ func ImportDatapoints(dataType string, inputPath string) {
 						}
 
 						// calculate the start_time_parsed
+						if fileDuration == 0 {
+							startTime = info.ModTime()
+							endTime = startTime
+						}
 						startTime = info.ModTime().Add(time.Duration(-(int64(fileDuration))) * time.Second)
 						endTime = info.ModTime()
 					}
