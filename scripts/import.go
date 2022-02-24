@@ -3,6 +3,7 @@ package scripts
 import (
 	"fmt"
 	"github.com/cnf/structhash"
+	"github.com/superhawk610/bar"
 	"memento/structs"
 	"memento/utils"
 	"os"
@@ -27,11 +28,21 @@ func ImportDatapoints(dataType string, inputPath string) {
 	}
 	dataPoints := make(map[string][]structs.DataPoint)
 
+	fileCount, err := utils.FileCount(inputPath)
+	if utils.Handle(err) != nil {
+		return
+	}
+
+	bar1 := bar.NewWithOpts(
+		bar.WithDimensions(fileCount, 50),
+		bar.WithDisplay("[", "█", "█", " ", "]"),
+		bar.WithFormat("Importing files :bar :percent"),
+	)
 	// make a list of all datapoints
 	if _, err := os.Stat(inputPath); err == nil {
 		// walk through every file in the path
 		err = filepath.Walk(inputPath, func(filePath string, info os.FileInfo, err error) error {
-			fmt.Println(info.Name())
+			// fmt.Println(info.Name())
 
 			// for every file extensions the give format can possibly have
 			for _, extension := range typeEnums[dataType].Extensions {
@@ -93,6 +104,9 @@ func ImportDatapoints(dataType string, inputPath string) {
 					dataPoints[startTime.Format("2006-01")] = append(dataPoints[startTime.Format("2006-01")], dataPoint)
 				}
 			}
+			bar1.TickAndUpdate(bar.Context{
+				bar.Ctx("file", info.Name()),
+			})
 			return err
 		})
 		if utils.Handle(err) != nil {
@@ -100,6 +114,12 @@ func ImportDatapoints(dataType string, inputPath string) {
 		}
 	}
 
+	fmt.Print("\n")
+	bar2 := bar.NewWithOpts(
+		bar.WithDimensions(len(dataPoints), 50),
+		bar.WithDisplay("[", "█", "█", " ", "]"),
+		bar.WithFormat("Serializing data :bar :percent"),
+	)
 	// write all the datapoints to the gob files
 	for key, daDataPoints := range dataPoints {
 
@@ -114,7 +134,9 @@ func ImportDatapoints(dataType string, inputPath string) {
 			}
 			for _, datapoint := range daDataPoints {
 				datapointHash, err := structhash.Hash(datapoint, 1)
-				if utils.Handle(err) != nil { return }
+				if utils.Handle(err) != nil {
+					return
+				}
 
 				if !utils.InList(datapointHash, monthData.Hashes) {
 					fmt.Println("its a new one", datapointHash, monthData.Hashes)
@@ -155,7 +177,9 @@ func ImportDatapoints(dataType string, inputPath string) {
 
 			for _, datapoint := range daDataPoints {
 				datapointHash, err := structhash.Hash(datapoint, 1)
-				if utils.Handle(err) != nil { return }
+				if utils.Handle(err) != nil {
+					return
+				}
 				monthData.Hashes = append(monthData.Hashes, datapointHash)
 			}
 		}
@@ -171,10 +195,7 @@ func ImportDatapoints(dataType string, inputPath string) {
 			return
 		}
 
+		bar2.Tick()
 	}
 	return
-
-	// TODO: add redundancy
-	// TODO: solve issue when adding the same set of datapoints more than one time
-	// TODO: figure out a way to handle errors
 }

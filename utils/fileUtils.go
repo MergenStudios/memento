@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+	"os"
+	"path/filepath"
 )
 
 type BoxHeader struct {
@@ -69,4 +71,16 @@ func getHeaderBoxInfo(data []byte) (boxHeader BoxHeader) {
 func getFourccType(boxHeader BoxHeader) (fourccType string) {
 	fourccType = string(boxHeader.FourccType[:])
 	return
+}
+
+
+func FileCount(path string) (int, error) {
+	fileCount := 0
+	err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
+		fileCount++
+		return nil
+	})
+	if Handle(err) != nil { return 0, err }
+
+	return fileCount, nil
 }
