@@ -149,7 +149,6 @@ func ImportDatapoints(dataType string, inputPath string, projectPath string, per
 				}
 
 				if !utils.InList(datapointHash, monthData.Hashes) {
-					fmt.Println("its a new one", datapointHash, monthData.Hashes)
 					monthData.Hashes = append(monthData.Hashes, datapointHash)
 					monthData.Data = append(monthData.Data, daDataPoints...)
 				} else {
@@ -210,15 +209,15 @@ func ImportDatapoints(dataType string, inputPath string, projectPath string, per
 		}
 	}
 
-	if console {
-		if duplicates > 0 {
-			fmt.Println("Found " +
-				strconv.FormatInt(duplicates, 10) +
-				" duplicates out of " +
-				strconv.FormatInt(utils.GetDatapointsLen(dataPoints), 10) +
-				" files")
-		}
+	if duplicates > 0 && console {
+		fmt.Printf("\n")
+		fmt.Println("Found " +
+			strconv.FormatInt(duplicates, 10) +
+			" duplicates out of " +
+			strconv.FormatInt(utils.GetDatapointsLen(dataPoints), 10) +
+			" files")
 	}
+
 
 	// add directory as a permanent data source
 	if permanent {
