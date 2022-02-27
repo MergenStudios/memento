@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func Reporter(startDate time.Time, fileName string, projectPath string,  timezone *time.Location, stats bool) {
+func Reporter(startDate time.Time, fileName, projectPath string,  timezone *time.Location, stats bool) {
 	convertedDay := startDate.In(timezone)
 	name, _ := convertedDay.Zone()
 

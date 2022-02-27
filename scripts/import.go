@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-func ImportDatapoints(dataType string, inputPath string, projectPath string, permanent, console bool) {
+func ImportDatapoints(dataType, inputPath, projectPath string, permanent, console bool) {
 	// set the timezone
 	timezone, err := time.LoadLocation("UTC")
 	if utils.Handle(err) != nil {
@@ -217,7 +217,6 @@ func ImportDatapoints(dataType string, inputPath string, projectPath string, per
 			strconv.FormatInt(utils.GetDatapointsLen(dataPoints), 10) +
 			" files")
 	}
-
 
 	// add directory as a permanent data source
 	if permanent {
