@@ -22,7 +22,7 @@ git clone https://github.com/MergenStudios/memento
 
 ### Windows
 
-Open a new terminal as administrator (this is required to add the service that manages permanent dat sources). Navigate to the folder and run
+Open a new terminal as administrator (this is required to add the service that manages permanent data sources). Navigate to the folder and run
 
 ```
 make windows
