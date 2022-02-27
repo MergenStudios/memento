@@ -15,7 +15,7 @@ func Update(path string) {
 		// update every path
 		for projectPath, project := range permSources {
 			for _, info := range project {
-				ImportDatapoints(info.Type, info.Type, projectPath, false)
+				ImportDatapoints(info.Type, info.Type, projectPath, false, false)
 			}
 		}
 	} else {
@@ -23,7 +23,7 @@ func Update(path string) {
 			fmt.Println("There are no permanent sources in this project yet, check memento import --help to find out how to add permanent sources.")
 		} else {
 			for _, info := range permSources[path] {
-				ImportDatapoints(info.Type, info.Path, path, false)
+				ImportDatapoints(info.Type, info.Path, path, false, false)
 			}
 		}
 	}

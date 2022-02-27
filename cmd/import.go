@@ -41,7 +41,7 @@ check memento types --help for more information.`,
 
 			fmt.Println(workingDir)
 
-			scripts.ImportDatapoints(datatype, path, workingDir, permanent)
+			scripts.ImportDatapoints(datatype, path, workingDir, permanent, true)
 			return
 		}
 	},

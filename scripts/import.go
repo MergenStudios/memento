@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-func ImportDatapoints(dataType string, inputPath string, projectPath string, permanent bool) {
+func ImportDatapoints(dataType string, inputPath string, projectPath string, permanent, console bool) {
 	// set the timezone
 	timezone, err := time.LoadLocation("UTC")
 	if utils.Handle(err) != nil {
@@ -35,11 +35,14 @@ func ImportDatapoints(dataType string, inputPath string, projectPath string, per
 		return
 	}
 
-	bar1 := bar.NewWithOpts(
-		bar.WithDimensions(fileCount, 50),
-		bar.WithDisplay("[", "█", "█", " ", "]"),
-		bar.WithFormat("Importing files :bar :percent"),
-	)
+	var bar1 *bar.Bar
+	if console {
+		bar1 = bar.NewWithOpts(
+			bar.WithDimensions(fileCount, 50),
+			bar.WithDisplay("[", "█", "█", " ", "]"),
+			bar.WithFormat("Importing files :bar :percent"),
+		)
+	}
 	// make a list of all datapoints
 	if _, err := os.Stat(inputPath); err == nil {
 		// walk through every file in the path
@@ -106,9 +109,9 @@ func ImportDatapoints(dataType string, inputPath string, projectPath string, per
 					dataPoints[startTime.Format("2006-01")] = append(dataPoints[startTime.Format("2006-01")], dataPoint)
 				}
 			}
-			bar1.TickAndUpdate(bar.Context{
-				bar.Ctx("file", info.Name()),
-			})
+			if console {
+				bar1.Tick()
+			}
 			return err
 		})
 		if utils.Handle(err) != nil {
@@ -116,13 +119,18 @@ func ImportDatapoints(dataType string, inputPath string, projectPath string, per
 		}
 	}
 
-	fmt.Print("\n")
-	bar2 := bar.NewWithOpts(
-		bar.WithDimensions(len(dataPoints), 50),
-		bar.WithDisplay("[", "█", "█", " ", "]"),
-		bar.WithFormat("Serializing data :bar :percent"),
-	)
+	var bar2 *bar.Bar
+	if console {
+		fmt.Print("\n")
+		bar2 = bar.NewWithOpts(
+			bar.WithDimensions(len(dataPoints), 50),
+			bar.WithDisplay("[", "█", "█", " ", "]"),
+			bar.WithFormat("Serializing data :bar :percent"),
+		)
+
+	}
 	// write all the datapoints to the gob files
+	var duplicates int64 = 0
 	for key, daDataPoints := range dataPoints {
 
 		var monthData structs.MonthData
@@ -145,7 +153,7 @@ func ImportDatapoints(dataType string, inputPath string, projectPath string, per
 					monthData.Hashes = append(monthData.Hashes, datapointHash)
 					monthData.Data = append(monthData.Data, daDataPoints...)
 				} else {
-					fmt.Println("Duplicate found: " + datapoint.Path)
+					duplicates++
 				}
 			}
 
@@ -197,7 +205,19 @@ func ImportDatapoints(dataType string, inputPath string, projectPath string, per
 			return
 		}
 
-		bar2.Tick()
+		if console {
+			bar2.Tick()
+		}
+	}
+
+	if console {
+		if duplicates > 0 {
+			fmt.Println("Found " +
+				strconv.FormatInt(duplicates, 10) +
+				" duplicates out of " +
+				strconv.FormatInt(utils.GetDatapointsLen(dataPoints), 10) +
+				" files")
+		}
 	}
 
 	// add directory as a permanent data source
