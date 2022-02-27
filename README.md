@@ -2,6 +2,16 @@
 
 Memento is a command line tool written in go for sorting and categorizing personal files like screenshots, recordings, logs and more. It can generate a report for a specific day, containing all the datapoints from that day, giving the user a timeline-like overview  of what happened that day. 
 
+## Supported platforms
+
+- Windows
+  
+  Windows is fully supported, including permanent data sources
+
+- Linux and Mac
+  
+  Linux and Mac is supported, excluding permanent data sources (support for permanent data sources on those platforms is coming soon!)
+
 ## Installation
 
 Clone this repo with
@@ -10,11 +20,23 @@ Clone this repo with
 git clone https://github.com/MergenStudios/memento
 ```
 
+### Windows
+
+Open a new terminal as administrator (this is required to add the service that manages permanent dat sources). Navigate to the folder and run
+
+```
+make windows
+```
+
+### Mac/Linux
+
 Navigate to the folder and run
 
 ```
 go install memento.go
 ```
+
+
 
 To use, type `memento` anywhere in your terminal
 
