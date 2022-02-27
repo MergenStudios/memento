@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"memento/scripts"
+	"os"
 	"time"
 )
 
@@ -15,6 +16,8 @@ var reportCmd = &cobra.Command{
 Be sure to use YYYY-MM-DD for the date and Area/Location according to the IANA timezone database for the timezone.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
+		workingDir, _ := os.Getwd()
+
 		if len(args) != 2 {
 			if len(args) == 0 {
 				fmt.Println("No arguments provided. Check memento report --help for more information.")
@@ -36,7 +39,7 @@ Be sure to use YYYY-MM-DD for the date and Area/Location according to the IANA t
 			timezone, _ := time.LoadLocation(args[1])
 			utcDay, _ := time.Parse("2006-01-02 ", args[0])
 
-			scripts.Reporter(utcDay, fileName, timezone, stats)
+			scripts.Reporter(utcDay, fileName, workingDir, timezone, stats)
 		}
 	},
 }

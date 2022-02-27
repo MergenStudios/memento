@@ -1,12 +1,14 @@
 package scripts
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/cnf/structhash"
 	"github.com/superhawk610/bar"
 	"memento/structs"
 	"memento/utils"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -14,7 +16,7 @@ import (
 	"time"
 )
 
-func ImportDatapoints(dataType string, inputPath string) {
+func ImportDatapoints(dataType string, inputPath string, projectPath string, permanent bool) {
 	// set the timezone
 	timezone, err := time.LoadLocation("UTC")
 	if utils.Handle(err) != nil {
@@ -22,7 +24,7 @@ func ImportDatapoints(dataType string, inputPath string) {
 	}
 
 	// load the data type enums here
-	typeEnums, err := utils.LoadConfig()
+	typeEnums, err := utils.LoadConfig(projectPath)
 	if utils.Handle(err) != nil {
 		return
 	}
@@ -196,6 +198,41 @@ func ImportDatapoints(dataType string, inputPath string) {
 		}
 
 		bar2.Tick()
+	}
+
+	// add directory as a permanent data source
+	if permanent {
+		appDataPath := os.Getenv("APPDATA")
+		configPath := "\\memento\\permSources.json"
+		fullPath := path.Join(appDataPath, configPath)
+
+		if utils.Handle(utils.EnsureAppdata()) != nil {
+			return
+		}
+
+		permSources, err := utils.LoadAppdata()
+		if utils.Handle(err) != nil {
+			return
+		}
+
+		workingDir, err := os.Getwd()
+		if utils.Handle(err) != nil {
+			return
+		}
+
+		permSources[workingDir] = append(permSources[workingDir], structs.PermSource{
+			Type: dataType,
+			Path: inputPath,
+		})
+
+		jsonString, err := json.Marshal(permSources)
+		if utils.Handle(err) != nil {
+			return
+		}
+
+		if utils.Handle(os.WriteFile(fullPath, jsonString, os.ModePerm)) != nil {
+			return
+		}
 	}
 	return
 }

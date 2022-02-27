@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"memento/scripts"
+	"os"
 )
 
 var typesCmd = &cobra.Command{
@@ -15,7 +16,8 @@ var typesAdd = &cobra.Command{
 	Short: "Add a type to memento project",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		scripts.Add()
+		workingDir, _ := os.Getwd()
+		scripts.Add(workingDir)
 	},
 }
 
@@ -24,7 +26,8 @@ var typesRemove = &cobra.Command{
 	Short: "Remove a type from your memento project",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		scripts.Remove()
+		workingDir, _ := os.Getwd()
+		scripts.Remove(workingDir)
 	},
 }
 
@@ -33,7 +36,8 @@ var typesList = &cobra.Command{
 	Short: "List all types in your memento project",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		scripts.List()
+		workingDir, _ := os.Getwd()
+		scripts.List(workingDir)
 	},
 }
 

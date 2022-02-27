@@ -11,6 +11,11 @@ type TypeEnum struct {
 	DetermineTime string   `json:"determine_time"`
 }
 
+type PermSource struct {
+	Type string `json:"type"`
+	Path string `json:"path"`
+}
+
 type MonthData struct {
 	Hashes    []string
 	StartTime time.Time
@@ -23,5 +28,5 @@ type DataPoint struct {
 	Start time.Time
 	End   time.Time
 	Type  string
-	Path  string 	`hash:"-"`
+	Path  string `hash:"-"`
 }

@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-func Add() {
-	config, err := utils.LoadConfig()
+func Add(projectPath string) {
+	config, err := utils.LoadConfig(projectPath)
 	if utils.Handle(err) != nil { return }
 
 	var id string
@@ -75,11 +75,11 @@ func Add() {
 	os.WriteFile("./config/typesEnum.json", jsonString, os.ModePerm)
 }
 
-func Remove() {
+func Remove(projectPath string) {
 	var id string
 
 	input := bufio.NewReader(os.Stdin)
-	config, err := utils.LoadConfig()
+	config, err := utils.LoadConfig(projectPath)
 	if utils.Handle(err) != nil { return }
 
 	fmt.Print("Enter the ID of the type you wish to delete: ")
@@ -101,8 +101,8 @@ func Remove() {
 	os.WriteFile("./config/typesEnum.json", jsonString, os.ModePerm)
 }
 
-func List() {
-	config, err := utils.LoadConfig()
+func List(projectPath string) {
+	config, err := utils.LoadConfig(projectPath)
 	if utils.Handle(err) != nil { return }
 
 	for key, value := range config {

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func Reporter(startDate time.Time, fileName string, timezone *time.Location, stats bool) {
+func Reporter(startDate time.Time, fileName string, projectPath string,  timezone *time.Location, stats bool) {
 	convertedDay := startDate.In(timezone)
 	name, _ := convertedDay.Zone()
 
@@ -17,7 +17,7 @@ func Reporter(startDate time.Time, fileName string, timezone *time.Location, sta
 	endDate := startDate.AddDate(0, 0, 1)
 
 	// load the data type enums here
-	typeEnums, err := utils.LoadConfig()
+	typeEnums, err := utils.LoadConfig(projectPath)
 	if utils.Handle(err) != nil {
 		return
 	}
