@@ -1,3 +1,5 @@
+![image](https://user-images.githubusercontent.com/71030751/155955658-bb773d2d-b1af-44c6-9a61-37ded7825a73.png)
+
 # memento
 
 Memento is a command line tool written in go for sorting and categorizing personal files like screenshots, recordings, logs and more. It can generate a report for a specific day, containing all the datapoints from that day, giving the user a timeline-like overview  of what happened that day. 
