@@ -12,7 +12,13 @@ Memento is a command line tool written in go for sorting and categorizing person
 
 - Linux and Mac
   
-  Linux and Mac is supported, excluding permanent data sources (support for permanent data sources on those platforms is coming soon!)
+  Linux and Mac are supported, excluding permanent data sources (support coming soon!)
+
+## Requirements
+
+- `Go 1.17+`
+
+- `make` (only windows)
 
 ## Installation
 
@@ -38,9 +44,7 @@ Navigate to the folder and run
 go install memento.go
 ```
 
-
-
-To use, type `memento` anywhere in your terminal
+**To use, type `memento` anywhere in your terminal**
 
 ## Usage
 
