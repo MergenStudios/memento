@@ -134,7 +134,7 @@ func ImportDatapoints(dataType, inputPath, projectPath string, permanent, consol
 	for key, daDataPoints := range dataPoints {
 
 		var monthData structs.MonthData
-		gobPath := filepath.Join(projectPath, key+".gob")
+		gobPath := filepath.Join(projectPath, "data", key+".gob")
 
 		// if the gob file exists
 		if _, err := os.Stat(gobPath); err == nil {
