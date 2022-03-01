@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"memento/scripts"
-	"os"
+	"memento/utils"
 	"time"
 )
 
@@ -16,7 +16,10 @@ var reportCmd = &cobra.Command{
 Be sure to use YYYY-MM-DD for the date and Area/Location according to the IANA timezone database for the timezone.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		workingDir, _ := os.Getwd()
+		workingDir, err := utils.GetProjectPath()
+		if utils.Handle(err) != nil {
+			return
+		}
 
 		if len(args) != 2 {
 			if len(args) == 0 {

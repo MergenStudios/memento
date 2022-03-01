@@ -1,10 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"memento/scripts"
 	"memento/utils"
-	"os"
 )
 
 var updateCmd = &cobra.Command{
@@ -18,7 +18,9 @@ by a background service, but this command can be used to do it manually.`,
 		if all {
 			scripts.Update("all-console")
 		} else {
-			workingDir, err := os.Getwd()
+			workingDir, err := utils.GetProjectPath()
+			if err != nil { fmt.Println(err); return}
+
 			if utils.Handle(err) != nil {
 				return
 			}

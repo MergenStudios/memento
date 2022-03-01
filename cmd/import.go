@@ -16,7 +16,11 @@ You can manipulate the types in your memento project with the types command,
 check memento types --help for more information.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		workingDir, _ := os.Getwd()
+		workingDir, err := utils.GetProjectPath()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
 		// check if the args are valid
 		if len(args) != 2 {
@@ -30,7 +34,6 @@ check memento types --help for more information.`,
 				fmt.Println("Too many arguments provided. Check memento import --help for more information")
 			}
 		} else if ok, _ := utils.IsType(args[0], workingDir); !ok {
-			fmt.Println("Args: ", workingDir, args[0])
 			fmt.Printf("Uknown datatype: %s. Check memento types list for all types.", args[0])
 		} else if _, err := os.Stat(args[1]); os.IsNotExist(err) {
 			fmt.Printf("No such file or directory: %s", args[1])

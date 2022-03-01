@@ -98,7 +98,7 @@ func Remove(projectPath string) {
 
 	delete(config, id)
 	jsonString, _ := json.Marshal(config)
-	os.WriteFile("./config/typesEnum.json", jsonString, os.ModePerm)
+	if utils.Handle(os.WriteFile("./config/typesEnum.json", jsonString, os.ModePerm)) != nil { return }
 }
 
 func List(projectPath string) {

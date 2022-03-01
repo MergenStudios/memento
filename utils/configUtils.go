@@ -12,7 +12,7 @@ import (
 
 func LoadConfig(projectPath string) (map[string]structs.TypeEnum, error) {
 	// load the data type enums here
-	jsonFile, err := os.Open(filepath.Join(filepath.Clean(projectPath), `\config\typesEnum.json`))
+	jsonFile, err := os.Open(filepath.Join(filepath.Clean(projectPath), `\typesEnum.json`))
 	if err != nil {
 		return nil, err
 	}

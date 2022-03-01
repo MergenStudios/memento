@@ -134,7 +134,7 @@ func ImportDatapoints(dataType, inputPath, projectPath string, permanent, consol
 	for key, daDataPoints := range dataPoints {
 
 		var monthData structs.MonthData
-		gobPath := filepath.Join(inputPath, key + ".gob")
+		gobPath := filepath.Join(projectPath, key+".gob")
 
 		// if the gob file exists
 		if _, err := os.Stat(gobPath); err == nil {
@@ -209,9 +209,11 @@ func ImportDatapoints(dataType, inputPath, projectPath string, permanent, consol
 		}
 	}
 
-	if duplicates > 0 && console {
+	if console {
 		fmt.Printf("\n")
-		fmt.Println("Found " +
+		fmt.Println("Imported " +
+			strconv.FormatInt(utils.GetDatapointsLen(dataPoints)-duplicates, 10) +
+			" files, found " +
 			strconv.FormatInt(duplicates, 10) +
 			" duplicates out of " +
 			strconv.FormatInt(utils.GetDatapointsLen(dataPoints), 10) +
@@ -233,7 +235,12 @@ func ImportDatapoints(dataType, inputPath, projectPath string, permanent, consol
 			return
 		}
 
-		workingDir, err := os.Getwd()
+		workingDir, err := utils.GetProjectPath()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
 		if utils.Handle(err) != nil {
 			return
 		}
