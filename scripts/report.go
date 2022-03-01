@@ -51,7 +51,7 @@ func Reporter(startDate time.Time, fileName, projectPath string,  timezone *time
 	fileTypesCount := make(map[string]int64)
 	for _, value := range monthData.Data {
 		valueStart := value.Start.In(timezone)
-		valueEnd := value.Start.In(timezone)
+		valueEnd := value.End.In(timezone)
 
 		// if the value is inside the desired timespan
 		if valueStart.After(startDate) && valueStart.Before(endDate) {
