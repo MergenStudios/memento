@@ -53,5 +53,5 @@ check memento types --help for more information.`,
 func init() {
 	RootCmd.AddCommand(importCmd)
 
-	importCmd.Flags().Bool("permanent", false, "Add this directory to be checked for new files on every startup.")
+	importCmd.Flags().BoolP("permanent", "p", false, "Add this directory to be checked for new files on every startup.")
 }

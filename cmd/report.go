@@ -50,6 +50,6 @@ Be sure to use YYYY-MM-DD for the date and Area/Location according to the IANA t
 func init() {
 	RootCmd.AddCommand(reportCmd)
 
-	reportCmd.Flags().String("output", "", "The filename of the report")
-	reportCmd.Flags().Bool("stats", false, "Add general stats about the day to your report")
+	reportCmd.Flags().StringP("output", "o", "", "The filename of the report")
+	reportCmd.Flags().BoolP("stats", "s", false, "Add general stats about the day to your report")
 }
