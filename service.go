@@ -24,7 +24,7 @@ func (p program) Start(s service.Service) error {
 	writingSync.Unlock()
 
 	// update the permanent sources here
-	scripts.Update("")
+	scripts.Update("all-background")
 	return nil
 }
 
