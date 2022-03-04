@@ -27,7 +27,7 @@ func GetMP4Duration(reader io.ReaderAt) (lengthOfTime uint32, err error) {
 			return 0, nil
 		}
 		_, err := reader.ReadAt(info, offset)
-		if Handle(err) != nil { return 0, err}
+		if err != nil { return 0, err}
 
 		boxHeader = getHeaderBoxInfo(info)
 		fourccType := getFourccType(boxHeader)

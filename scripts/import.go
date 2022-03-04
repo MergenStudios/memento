@@ -2,9 +2,11 @@ package scripts
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/cnf/structhash"
 	"github.com/superhawk610/bar"
+	"io"
 	"memento/structs"
 	"memento/utils"
 	"os"
@@ -40,7 +42,7 @@ func ImportDatapoints(dataType, inputPath, projectPath string, permanent, consol
 		bar1 = bar.NewWithOpts(
 			bar.WithDimensions(fileCount, 50),
 			bar.WithDisplay("[", "█", "█", " ", "]"),
-			bar.WithFormat("Importing files :bar :percent"),
+			bar.WithFormat("Importing files  :bar :percent"),
 		)
 	}
 	// make a list of all datapoints
@@ -114,7 +116,8 @@ func ImportDatapoints(dataType, inputPath, projectPath string, permanent, consol
 			}
 			return err
 		})
-		if utils.Handle(err) != nil {
+		if errors.Is(err, io.EOF) {
+		} else if utils.Handle(err) != nil {
 			return
 		}
 	}
