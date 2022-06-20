@@ -9,36 +9,34 @@ import (
 
 func Setup() {
 	// create the directory structure needed for a memento collection
-	if utils.Handle(os.Mkdir("data", os.ModePerm)) != nil { return }
-	if utils.Handle(os.Mkdir("reports", os.ModePerm)) != nil { return }
+	if utils.Handle(os.Mkdir("data", os.ModePerm)) != nil {
+		return
+	}
+	if utils.Handle(os.Mkdir("reports", os.ModePerm)) != nil {
+		return
+	}
 
-	typesEnum := map[string]structs.TypeEnum{
-		"RECORDINGS": {
-			TrueName:      "Recording",
-			Extensions:    []string{"mp4", "mov"},
-			Dated:         "range",
-			DetermineTime: "video",
+	patterns := map[string]structs.Pattern{
+		".png": {
+			Regex:  "([0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}[.][0-9]{2}[.][0-9]{2})",
+			Format: "2006-01-02_15.04.05",
 		},
-		"VIDEOS": {
-			TrueName:      "Video",
-			Extensions:    []string{"mp4", "mov"},
-			Dated:         "range",
-			DetermineTime: "video",
+		".gz": {
+			Regex:  "([0-9]{4}-[0-9]{2}-[0-9]{2})-[0-9]*[.]log",
+			Format: "2006.01.02",
 		},
-		"SCREENSHOTS": {
-			TrueName:      "Screenshot",
-			Extensions:    []string{"png", "jpg"},
-			Dated:         "point",
-			DetermineTime: "mtime",
+		".mp4": {
+			Regex:  "([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}-[0-9]{2}-[0-9]{2})",
+			Format: "2006-01-02 15-04-05",
 		},
-		"PHOTOS": {
-			TrueName:      "Photo",
-			Extensions:    []string{"png", "jpg"},
-			Dated:         "point",
-			DetermineTime: "mtime",
+		".mcpr": {
+			Regex:  "([0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{2}_[0-9]{2}_[0-9]{2})",
+			Format: "2006_01_02_15_04_05",
 		},
 	}
 
-	jsonString, _ := json.Marshal(typesEnum)
-	if utils.Handle(os.WriteFile("./typesEnum.json", jsonString, os.ModePerm)) != nil { return }
+	jsonString, _ := json.Marshal(patterns)
+	if utils.Handle(os.WriteFile("./patterns.json", jsonString, os.ModePerm)) != nil {
+		return
+	}
 }

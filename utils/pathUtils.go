@@ -18,7 +18,7 @@ func GetProjectPath() (string, error) {
 			return "not found", nil
 		}
 
-		if _, err := os.Stat(filepath.Join(path, "typesEnum.json")); err == nil {
+		if _, err := os.Stat(filepath.Join(path, "patterns.json")); err == nil {
 			return path, nil
 		} else if errors.Is(err, os.ErrNotExist) {
 			path = filepath.Clean(filepath.Join(path, ".."))

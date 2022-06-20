@@ -4,16 +4,9 @@ import (
 	"time"
 )
 
-type TypeEnum struct {
-	TrueName      string   `json:"true_name"`
-	Extensions    []string `json:"extensions"`
-	Dated         string   `json:"Dated"`
-	DetermineTime string   `json:"determine_time"`
-}
-
-type PermSource struct {
-	Type string `json:"type"`
-	Path string `json:"path"`
+type Pattern struct {
+	Regex  string `json:"regex"`
+	Format string `json:"pattern"`
 }
 
 type MonthData struct {
@@ -24,9 +17,6 @@ type MonthData struct {
 }
 
 type DataPoint struct {
-	Dated string
 	Start time.Time
-	End   time.Time
-	Type  string
 	Path  string `hash:"-"`
 }

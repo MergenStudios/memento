@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"memento/scripts"
-	"memento/utils"
 	"time"
 )
 
@@ -16,11 +15,6 @@ var reportCmd = &cobra.Command{
 Be sure to use YYYY-MM-DD for the date and Area/Location according to the IANA timezone database for the timezone.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		workingDir, err := utils.GetProjectPath()
-		if utils.Handle(err) != nil {
-			return
-		}
-
 		if len(args) != 2 {
 			if len(args) == 0 {
 				fmt.Println("No arguments provided. Check memento report --help for more information.")
@@ -37,12 +31,11 @@ Be sure to use YYYY-MM-DD for the date and Area/Location according to the IANA t
 			fmt.Println("Couldn't pares timezone - be sure to use Area/Location according to the IANA timezone database (https://www.iana.org/time-zones)")
 		} else {
 			fileName, _ := cmd.Flags().GetString("output")
-			stats, _ := cmd.Flags().GetBool("stats")
 
 			timezone, _ := time.LoadLocation(args[1])
 			utcDay, _ := time.Parse("2006-01-02 ", args[0])
 
-			scripts.Reporter(utcDay, fileName, workingDir, timezone, stats)
+			scripts.Reporter(utcDay, fileName, timezone)
 		}
 	},
 }
@@ -51,5 +44,4 @@ func init() {
 	RootCmd.AddCommand(reportCmd)
 
 	reportCmd.Flags().StringP("output", "o", "", "The filename of the report")
-	reportCmd.Flags().BoolP("stats", "s", false, "Add general stats about the day to your report")
 }

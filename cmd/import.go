@@ -9,11 +9,9 @@ import (
 )
 
 var importCmd = &cobra.Command{
-	Use:   "import [flags] [TYPE] [PATH]",
+	Use:   "import [flags] [PATH]",
 	Short: "Import datapoints to your memento project",
-	Long: `This command is used to import datapoints into your project. It takes in a type and a path as arguments.
-You can manipulate the types in your memento project with the types command, 
-check memento types --help for more information.`,
+	Long:  `This command is used to import datapoints into your project.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		workingDir, err := utils.GetProjectPath()
@@ -23,28 +21,19 @@ check memento types --help for more information.`,
 		}
 
 		// check if the args are valid
-		if len(args) != 2 {
+		if len(args) != 1 {
 			if len(args) == 0 {
 				fmt.Println("No arguments provided. Check memento import --help for more information")
 				return
-			} else if len(args) == 2 {
-				fmt.Println("Not enough arguments provided. Check memento import --help for more information")
-				return
-			} else if len(args) > 2 {
+			} else if len(args) > 1 {
 				fmt.Println("Too many arguments provided. Check memento import --help for more information")
 			}
-		} else if ok, _ := utils.IsType(args[0], workingDir); !ok {
-			fmt.Printf("Uknown datatype: %s. Check memento types list for all types.", args[0])
-		} else if _, err := os.Stat(args[1]); os.IsNotExist(err) {
+		} else if _, err := os.Stat(args[0]); os.IsNotExist(err) {
 			fmt.Printf("No such file or directory: %s", args[1])
 		} else {
-			datatype := args[0]
-			path := args[1]
-			permanent, _ := cmd.Flags().GetBool("permanent")
+			path := args[0]
 
-			fmt.Println(workingDir)
-
-			scripts.ImportDatapoints(datatype, path, workingDir, permanent, true)
+			scripts.ImportDatapoints(path, workingDir)
 			return
 		}
 	},
@@ -52,6 +41,4 @@ check memento types --help for more information.`,
 
 func init() {
 	RootCmd.AddCommand(importCmd)
-
-	importCmd.Flags().BoolP("permanent", "p", false, "Add this directory to be checked for new files on every startup.")
 }
