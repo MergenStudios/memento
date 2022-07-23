@@ -6,9 +6,9 @@ import (
 	"github.com/superhawk610/bar"
 	"memento/structs"
 	"memento/utils"
+	"memento/utils/matcher"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -22,11 +22,12 @@ func ImportDatapoints(inputPath, projectPath string) {
 		return
 	}
 
-	patterns, err := utils.LoadPatterns(projectPath)
+	patterns, err := matcher.LoadPatterns(projectPath)
 	if utils.Handle(err) != nil {
 		return
 	}
 	dataPoints := make(map[string][]structs.DataPoint)
+
 
 	fileCount, err := utils.FileCount(inputPath)
 	if utils.Handle(err) != nil {
@@ -44,29 +45,37 @@ func ImportDatapoints(inputPath, projectPath string) {
 	if _, err := os.Stat(inputPath); err == nil {
 		// walk through every file in the path
 		err = filepath.Walk(inputPath, func(filePath string, info os.FileInfo, err error) error {
-			// fmt.Println(info.Name())
-			fileExtention := filepath.Ext(filePath)
-			if _, ok := patterns[fileExtention]; ok {
-				pattern := patterns[fileExtention]
-				regex := regexp.MustCompile(pattern.Regex)
-				nameMatch := regex.FindStringSubmatch(info.Name())[0]
+			// check if the file matches a pattern
+			filePattern, err := matcher.GenerateFilePattern(filePath)
+			if utils.Handle(err) != nil { return err }
 
-				startTime, err := time.Parse(pattern.Format, nameMatch)
-				if utils.Handle(err) != nil {
-					return err
-				}
 
-				dataPoint := structs.DataPoint{
-					Start: startTime,
-					Path:  filePath,
-				}
+			check, pattern := matcher.MatchPatterns(patterns, filePattern)
+			if !check { return nil }
 
-				// if the key doesnt exist, creat it and make the value an empty list of data points
-				if _, ok := dataPoints[startTime.Format("2006-01")]; !ok {
-					dataPoints[startTime.Format("2006-01")] = []structs.DataPoint{}
-				}
-				dataPoints[startTime.Format("2006-01")] = append(dataPoints[startTime.Format("2006-01")], dataPoint)
+			useConfig := pattern["Use"].(map[string]string)
+
+			rawPath := useConfig["Path"]
+			pathArr := strings.Split(rawPath, "/")
+
+			// todo: the error handling here can be improved
+			extractedString, err := matcher.ExtractFromPath(pathArr, pattern)
+			if extractedString == "" { return nil }
+
+			startTime, err := time.Parse(useConfig["Format"], extractedString)
+			if utils.Handle(err) != nil { return err }
+
+			dataPoint := structs.DataPoint{
+				Start: startTime,
+				Path:  filePath,
 			}
+
+			// if the key doesnt exist, creat it and make the value an empty list of data points
+			if _, ok := dataPoints[startTime.Format("2006-01")]; !ok {
+				dataPoints[startTime.Format("2006-01")] = []structs.DataPoint{}
+			}
+			dataPoints[startTime.Format("2006-01")] = append(dataPoints[startTime.Format("2006-01")], dataPoint)
+
 			bar1.Tick()
 			return nil
 		})
