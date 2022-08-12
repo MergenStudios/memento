@@ -2,32 +2,21 @@ package scripts
 
 import (
 	"fmt"
-	"github.com/cnf/structhash"
 	"github.com/superhawk610/bar"
 	"memento/structs"
 	"memento/utils"
 	"memento/utils/matcher"
 	"os"
 	"path/filepath"
-	"sort"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func ImportDatapoints(inputPath, projectPath string) {
-	// set the timezone
-	timezone, err := time.LoadLocation("UTC")
-	if utils.Handle(err) != nil {
-		return
-	}
-
+	fmt.Println(projectPath)
 	patterns, err := matcher.LoadPatterns(projectPath)
 	if utils.Handle(err) != nil {
 		return
 	}
-	dataPoints := make(map[string][]structs.DataPoint)
-
+	var dataPoints []structs.DataPoint
 
 	fileCount, err := utils.FileCount(inputPath)
 	if utils.Handle(err) != nil {
@@ -45,136 +34,42 @@ func ImportDatapoints(inputPath, projectPath string) {
 	if _, err := os.Stat(inputPath); err == nil {
 		// walk through every file in the path
 		err = filepath.Walk(inputPath, func(filePath string, info os.FileInfo, err error) error {
-			// check if the file matches a pattern
-			filePattern, err := matcher.GenerateFilePattern(filePath)
-			if utils.Handle(err) != nil { return err }
 
-
-			check, pattern := matcher.MatchPatterns(patterns, filePattern)
-			if !check { return nil }
-
-			useConfig := pattern["Use"].(map[string]string)
-
-			rawPath := useConfig["Path"]
-			pathArr := strings.Split(rawPath, "/")
-
-			// todo: the error handling here can be improved
-			extractedString, err := matcher.ExtractFromPath(pathArr, pattern)
-			if extractedString == "" { return nil }
-
-			startTime, err := time.Parse(useConfig["Format"], extractedString)
-			if utils.Handle(err) != nil { return err }
-
-			dataPoint := structs.DataPoint{
-				Start: startTime,
-				Path:  filePath,
+			// TODO: clean duplicates
+			basePattern := matcher.GenerateBasePattern(filePath)
+			check, pattern, err := matcher.MatchPatterns(patterns, basePattern)
+			if err != nil {
+				return err
 			}
 
-			// if the key doesnt exist, creat it and make the value an empty list of data points
-			if _, ok := dataPoints[startTime.Format("2006-01")]; !ok {
-				dataPoints[startTime.Format("2006-01")] = []structs.DataPoint{}
-			}
-			dataPoints[startTime.Format("2006-01")] = append(dataPoints[startTime.Format("2006-01")], dataPoint)
+			if !check {
+				// what do you do if it doesnt match a pattern
+				bar1.Tick()
+				return nil
+			} else {
+				patternInfo := pattern["pattern"].(map[string]string)
+				name := patternInfo["Name"]
 
-			bar1.Tick()
-			return nil
+				startTime, err:= matcher.GetDatetime(filePath, basePattern, pattern)
+				if err != nil {
+					return err
+				}
+
+				dataPoint := structs.DataPoint{
+					Start:	startTime,
+					Path:	filePath,
+					Type:	name,
+				}
+
+				dataPoints = append(dataPoints, dataPoint)
+
+				bar1.Tick()
+				return nil
+			}
 		})
 	}
 
-	var bar2 *bar.Bar
-	fmt.Print("\n")
-	bar2 = bar.NewWithOpts(
-		bar.WithDimensions(len(dataPoints), 50),
-		bar.WithDisplay("[", "█", "█", " ", "]"),
-		bar.WithFormat("Serializing data :bar :percent"),
-	)
+	// database stuff comes here
 
-	// write all the datapoints to the gob files
-	var duplicates int64 = 0
-	for key, daDataPoints := range dataPoints {
 
-		var monthData structs.MonthData
-		gobPath := filepath.Join(projectPath, "data", key+".gob")
-
-		// if the gob file exists
-		if _, err := os.Stat(gobPath); err == nil {
-			err = utils.ReadGob(gobPath, &monthData)
-			if utils.Handle(err) != nil {
-				return
-			}
-			for _, datapoint := range daDataPoints {
-				datapointHash, err := structhash.Hash(datapoint, 1)
-				if utils.Handle(err) != nil {
-					return
-				}
-
-				if !utils.InList(datapointHash, monthData.Hashes) {
-					monthData.Hashes = append(monthData.Hashes, datapointHash)
-					monthData.Data = append(monthData.Data, daDataPoints...)
-				} else {
-					duplicates++
-				}
-			}
-
-		} else {
-			splitString := strings.Split(key, "-")
-
-			year, err := strconv.ParseInt(splitString[0], 10, 64)
-			if utils.Handle(err) != nil {
-				return
-			}
-
-			month, err := strconv.ParseInt(splitString[1], 10, 64)
-			if utils.Handle(err) != nil {
-				return
-			}
-
-			// TODO: this can be improved
-			monthData.StartTime = time.Date(
-				int(year),
-				time.Month(month),
-				00,
-				00,
-				00,
-				00,
-				000000000,
-				timezone,
-			)
-
-			monthData.EndTime = monthData.StartTime.AddDate(0, 1, 0)
-			monthData.Data = daDataPoints
-
-			for _, datapoint := range daDataPoints {
-				datapointHash, err := structhash.Hash(datapoint, 1)
-				if utils.Handle(err) != nil {
-					return
-				}
-				monthData.Hashes = append(monthData.Hashes, datapointHash)
-			}
-		}
-
-		// sort the array of unsorted data points
-		sort.Slice(monthData.Data[:], func(i, j int) bool {
-			return monthData.Data[i].Start.Before(monthData.Data[j].Start)
-		})
-
-		// serialize the now sorted month data
-		err := utils.WriteGob(gobPath, monthData)
-		if utils.Handle(err) != nil {
-			return
-		}
-
-		bar2.Tick()
-	}
-
-	fmt.Printf("\n")
-	fmt.Println("Imported " +
-		strconv.FormatInt(utils.GetDatapointsLen(dataPoints)-duplicates, 10) +
-		" files, found " +
-		strconv.FormatInt(duplicates, 10) +
-		" duplicates out of " +
-		strconv.FormatInt(utils.GetDatapointsLen(dataPoints), 10) +
-		" files")
-
-	return
 }

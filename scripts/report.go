@@ -52,7 +52,7 @@ func Reporter(startDate time.Time, fileName string, timezone *time.Location) {
 		}
 	}
 
-	// TODO: make this return error so it returns "no files found" from the command
+	// TODO: make this return errors so it returns "no files found" from the command
 	if fileCount == 0 {
 		file.WriteString("No Files found for " + startDate.Format("2006-01-02"))
 	}

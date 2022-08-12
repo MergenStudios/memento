@@ -9,7 +9,7 @@ import (
 func Handle(err error) error {
 	if err != nil {
 		pc, filename, line, _ := runtime.Caller(1)
-		log.Printf("[error] in %s[%s:%d] %v", runtime.FuncForPC(pc).Name(), filename, line, err)
+		log.Printf("[errors] in %s[%s:%d] %v", runtime.FuncForPC(pc).Name(), filename, line, err)
 
 		return err
 	}

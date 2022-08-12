@@ -17,6 +17,8 @@ type MonthData struct {
 }
 
 type DataPoint struct {
-	Start time.Time
-	Path  string `hash:"-"`
+	Type	string
+	Start 	time.Time
+	Path  	string
+
 }

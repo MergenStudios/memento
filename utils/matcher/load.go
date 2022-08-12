@@ -2,6 +2,7 @@ package matcher
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -23,5 +24,6 @@ func LoadPatterns(projectPath string) ([]map[string]interface{}, error) {
 	}
 
 
+	fmt.Println(patterns)
 	return patterns, nil
 }
