@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"memento/errors"
 	"memento/extentions"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -15,17 +16,17 @@ import (
 // all functions will take in the filepath of the file in question
 // and return a datetime and an errors
 func GetDatetime(path string, filePattern, matchedPattern map[string]interface{}) (time.Time, error) {
-	patternSpecifics := matchedPattern["pattern"].(map[string]interface{})
+	matchedPatternSpecifics := matchedPattern["pattern"].(map[string]interface{})
 
 
-	if _, ok := patternSpecifics["Extention"]; ok {
+	if _, ok := matchedPatternSpecifics["Extention"]; ok {
 		// todo: define the mapping somewhere else
 		var ExtentionsMapping map[string]func(string) (time.Time, error)
 		ExtentionsMapping = map[string]func(string) (time.Time, error) {
 			"MC_LOGS": extentions.MC_LOGS,
 		}
 
-		extentionName := patternSpecifics["Extention"].(string)
+		extentionName := matchedPatternSpecifics["Extention"].(string)
 		fmt.Println(extentionName)
 		startTime, err := ExtentionsMapping[extentionName](path)
 		if err != nil {
@@ -34,15 +35,22 @@ func GetDatetime(path string, filePattern, matchedPattern map[string]interface{}
 		return startTime, nil
 
 	} else {
-		path := patternSpecifics["Path"].(string)
+		path := matchedPatternSpecifics["Path"].(string)
 		pathArr := strings.Split(path, "/")
 
 		extractedString, err := ExtractFromPath(pathArr, filePattern)
 		if err != nil {
 			return time.Time{}, err
 		}
+		extracedRegex, err := ExtractFromPath(pathArr, matchedPattern)
+		if err != nil {
+			return time.Time{}, err
+		}
 
-		startTime, err := time.Parse(patternSpecifics["Format"].(string), extractedString)
+		compiledRegex := regexp.MustCompile(extracedRegex)
+		matchedExtractedString := compiledRegex.FindStringSubmatch(extractedString)[1]
+
+		startTime, err := time.Parse(matchedPatternSpecifics["Format"].(string), matchedExtractedString)
 		if err != nil {
 			return time.Time{}, err
 		}

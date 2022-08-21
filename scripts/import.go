@@ -10,7 +10,6 @@ import (
 	"memento/utils/matcher"
 	"os"
 	"path/filepath"
-	"time"
 )
 
 func ImportDatapoints(inputPath, projectPath string) {
@@ -25,7 +24,8 @@ func ImportDatapoints(inputPath, projectPath string) {
 	if utils.Handle(err) != nil {
 		return
 	}
-
+	
+	fmt.Println(fileCount)
 	var bar1 *bar.Bar
 	bar1 = bar.NewWithOpts(
 		bar.WithDimensions(fileCount, 50),
@@ -37,7 +37,9 @@ func ImportDatapoints(inputPath, projectPath string) {
 	if _, err := os.Stat(inputPath); err == nil {
 		// walk through every file in the path
 		err = filepath.Walk(inputPath, func(filePath string, info os.FileInfo, err error) error {
-
+			if filePath == inputPath {
+				return nil
+			}
 			// TODO: clean duplicates
 			basePattern := matcher.GenerateBasePattern(filePath)
 			check, pattern, err := matcher.MatchPatterns(patterns, basePattern)
@@ -46,13 +48,13 @@ func ImportDatapoints(inputPath, projectPath string) {
 			}
 
 			if !check {
-				dataPoint := structs.DataPoint{
-					Start: time.Time{},
-					Path: filePath,
-					Type: "file",
-				}
+				//dataPoint := structs.DataPoint{
+				//	Start: time.Time{},
+				//	Path: filePath,
+				//	Type: "file",
+				//}
 
-				dataPoints = append(dataPoints, dataPoint)
+				// dataPoints = append(dataPoints, dataPoint)
 			} else {
 				patternInfo := pattern["pattern"].(map[string]interface{})
 				name := patternInfo["Name"].(string)
@@ -76,6 +78,7 @@ func ImportDatapoints(inputPath, projectPath string) {
 
 	}
 
+
 	var bar2 *bar.Bar
 	bar2 = bar.NewWithOpts(
 		bar.WithDimensions(len(dataPoints), 50),
@@ -96,8 +99,7 @@ VALUES ($1, $2, $3)
 `
 
 	preppedQuery, err := db.Prepare(querry)
-	if err != nil {
-		fmt.Println("prepped query error: ", err)
+	if utils.Handle(err) != nil {
 		return
 	}
 
