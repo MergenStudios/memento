@@ -3,6 +3,7 @@ package matcher
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os/exec"
 	"path/filepath"
 )
@@ -17,6 +18,7 @@ func GenerateBasePattern(path string) map[string]interface{} {
 
 
 func GetExifData(path string) (interface{}, error) {
+	fmt.Println("called")
 	cmd := exec.Command("exiftool", "-json", path)
 
 	var out bytes.Buffer

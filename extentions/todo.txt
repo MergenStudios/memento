@@ -1,0 +1,2 @@
+- mc_logs
+- mc_replays

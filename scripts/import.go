@@ -1,13 +1,16 @@
 package scripts
 
 import (
+	"database/sql"
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/superhawk610/bar"
 	"memento/structs"
 	"memento/utils"
 	"memento/utils/matcher"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func ImportDatapoints(inputPath, projectPath string) {
@@ -43,12 +46,16 @@ func ImportDatapoints(inputPath, projectPath string) {
 			}
 
 			if !check {
-				// what do you do if it doesnt match a pattern
-				bar1.Tick()
-				return nil
+				dataPoint := structs.DataPoint{
+					Start: time.Time{},
+					Path: filePath,
+					Type: "file",
+				}
+
+				dataPoints = append(dataPoints, dataPoint)
 			} else {
-				patternInfo := pattern["pattern"].(map[string]string)
-				name := patternInfo["Name"]
+				patternInfo := pattern["pattern"].(map[string]interface{})
+				name := patternInfo["Name"].(string)
 
 				startTime, err:= matcher.GetDatetime(filePath, basePattern, pattern)
 				if err != nil {
@@ -62,14 +69,54 @@ func ImportDatapoints(inputPath, projectPath string) {
 				}
 
 				dataPoints = append(dataPoints, dataPoint)
-
-				bar1.Tick()
-				return nil
 			}
+			bar1.Tick()
+			return nil
 		})
+
 	}
 
+	var bar2 *bar.Bar
+	bar2 = bar.NewWithOpts(
+		bar.WithDimensions(len(dataPoints), 50),
+		bar.WithDisplay("[", "█", "█", " ", "]"),
+		bar.WithFormat("Adding files to database  :bar :percent"),
+	)
+
 	// database stuff comes here
+	dbPath := projectPath + `\memento.db`
+	db, err := sql.Open("sqlite3", dbPath)
+	defer db.Close()
+	if utils.Handle(err) != nil { return }
 
 
+	querry := `
+INSERT INTO DataPoints (start_time, file_path, type)
+VALUES ($1, $2, $3)
+`
+
+	preppedQuery, err := db.Prepare(querry)
+	if err != nil {
+		fmt.Println("prepped query error: ", err)
+		return
+	}
+
+	for _, dataPoint := range dataPoints {
+		startUnix := utils.PositiveTimestmap(dataPoint.Start.Unix())
+
+		// todo: make this a bit more elegant
+		if startUnix < 0 {
+			_, err := preppedQuery.Exec(nil, dataPoint.Path, dataPoint.Type)
+			if utils.Handle(err) != nil {
+				return
+			}
+		} else {
+			_, err := preppedQuery.Exec(startUnix, dataPoint.Path, dataPoint.Type)
+			if utils.Handle(err) != nil {
+				return
+			}
+		}
+
+		bar2.Tick()
+	}
 }

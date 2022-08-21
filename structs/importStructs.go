@@ -20,5 +20,4 @@ type DataPoint struct {
 	Type	string
 	Start 	time.Time
 	Path  	string
-
 }
